@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Scientific Calculator</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+    }
+    .calc-container {
+      display: flex;
+      gap: 20px;
+    }
+    .calc {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      max-width: 360px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      height: 60px;
+      font-size: 26px;
+      text-align: right;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      outline: none;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.6);
+    }
+    button {
+      width: 70px;
+      height: 55px;
+      margin: 5px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      text-shadow: 0 0 5px #000;
+    }
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+    }
+    .op {
+      background: rgba(255, 165, 0, 0.8);
+    }
+    .row {
+      display: flex;
+      justify-content: center;
+    }
+    .history {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      border-radius: 15px;
+      width: 200px;
+      color: #fff;
+      max-height: 400px;
+      overflow-y: auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .history h3 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #00ffcc;
+    }
+    .history ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 16px;
+    }
+    .history ul li {
+      margin-bottom: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="calc-container">
+    <!-- Calculator -->
+    <div class="calc">
+      <input type="text" id="result" disabled>
+
+      <div class="row">
+        <button onclick="clr()">C</button>
+        <button onclick="del()">Del</button>
+        <button onclick="append('%')">%</button>
+        <button class="op" onclick="append('/')">/</button>
+      </div>
+
+      <div class="row">
+        <button onclick="append('7')">7</button>
+        <button onclick="append('8')">8</button>
+        <button onclick="append('9')">9</button>
+        <button class="op" onclick="append('*')">*</button>
+      </div>
+
+      <div class="row">
+        <button onclick="append('4')">4</button>
+        <button onclick="append('5')">5</button>
+        <button onclick="append('6')">6</button>
+        <button class="op" onclick="append('-')">-</button>
+      </div>
+
+      <div class="row">
+        <button onclick="append('1')">1</button>
+        <button onclick="append('2')">2</button>
+        <button onclick="append('3')">3</button>
+        <button class="op" onclick="append('+')">+</button>
+      </div>
+
+      <div class="row">
+        <button onclick="append('0')">0</button>
+        <button onclick="append('.')">.</button>
+        <button class="op" onclick="calc()">=</button>
+      </div>
+
+      <div class="row">
+        <button onclick="append('Math.PI')">π</button>
+        <button onclick="append('Math.sqrt(')">√</button>
+        <button onclick="append('**2')">x²</button>
+        <button onclick="append('**3')">x³</button>
+      </div>
+
+      <div class="row">
+        <button onclick="append('Math.sin(')">sin</button>
+        <button onclick="append('Math.cos(')">cos</button>
+        <button onclick="append('Math.tan(')">tan</button>
+        <button onclick="append('Math.log(')">log</button>
+      </div>
+
+      <!-- Memory Buttons -->
+      <div class="row">
+        <button onclick="memoryAdd()">M+</button>
+        <button onclick="memorySubtract()">M-</button>
+        <button onclick="memoryRecall()">MR</button>
+      </div>
+    </div>
+
+    <!-- History Panel -->
+    <div class="history">
+      <h3>History</h3>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
+
+  <script>
+    let res = document.getElementById('result');
+    let historyList = document.getElementById('historyList');
+    let memory = 0;
+
+    function append(value) { res.value += value; }
+    function clr() { res.value = ''; }
+    function del() { res.value = res.value.slice(0, -1); }
+    function calc() {
+      try {
+        let expression = res.value;
+        let result = eval(expression);
+        res.value = result;
+        addHistory(expression + ' = ' + result);
+      } catch (e) {
+        res.value = "Error";
+      }
+    }
+    function addHistory(entry) {
+      let li = document.createElement('li');
+      li.textContent = entry;
+      historyList.prepend(li);
+    }
+    // Memory functions
+    function memoryAdd() {
+      if (res.value) memory += parseFloat(eval(res.value));
+    }
+    function memorySubtract() {
+      if (res.value) memory -= parseFloat(eval(res.value));
+    }
+    function memoryRecall() {
+      res.value += memory;
+    }
+  </script>
+</body>
+</html>
